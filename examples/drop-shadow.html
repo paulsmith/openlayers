@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>Drop shadow on vector layers</title>
+        <link rel="stylesheet" href="../theme/default/style.css" type="text/css">
+        <link rel="stylesheet" href="style.css" type="text/css">
+        <script src="../lib/OpenLayers.js"></script>
+    </head>
+    <body onload="init();">
+        <h1 id="title">Drop shadow on vector layers</h1>
+        <div id="map" class="smallmap"></div>
+        <script>
+            var map;
+            function init() {
+                map = new OpenLayers.Map('map');
+                var layer = new OpenLayers.Layer.WMS('OpenLayers WMS',
+                    'http://vmap0.tiles.osgeo.org/wms/vmap0', {layers: 'basic'});
+                map.addLayer(layer);
+
+                var vectorLayer = new OpenLayers.Layer.Vector('Shadow layer', {
+                    styleMap: new OpenLayers.StyleMap({
+                        'default': {
+                            fillColor: '#ff9900',
+                            fillOpacity: 0.5,
+                            strokeColor: '#cc6600',
+                            strokeOpacity: 0.7,
+                            strokeWidth: 2,
+                            dropShadow: {
+                                dx: 5,
+                                dy: 5,
+                                amount: 5
+                            }
+                        },
+                    })
+                });
+
+                // Make New Mexico from a list of points
+                var pts = [[-107.421329, 37.000263], [-106.868158, 36.994786], [-104.337812, 36.994786], [-103.001438, 37.000263], [-103.001438, 36.501861], [-103.039777, 36.501861], [-103.045254, 34.01533], [-103.067161, 33.002096], [-103.067161, 31.999816], [-106.616219, 31.999816], [-106.643603, 31.901231], [-106.528588, 31.786216], [-108.210008, 31.786216], [-108.210008, 31.331629], [-109.04798, 31.331629], [-109.042503, 37.000263], [-107.421329, 37.000263]];
+                for (var i = 0, pt; pt = pts[i]; i++) {
+                    pts[i] = new OpenLayers.Geometry.Point(pt[0], pt[1]);
+                }
+                pts.push(pts[0]);
+
+                var linearRing = new OpenLayers.Geometry.LinearRing(pts);
+                var polygon = new OpenLayers.Geometry.Polygon([linearRing]);
+                var NewMexico = new OpenLayers.Feature.Vector(polygon);
+
+                map.addLayer(vectorLayer);
+                vectorLayer.addFeatures([NewMexico]);
+                map.zoomToExtent(polygon.getBounds());
+
+                var selectCtrl = new OpenLayers.Control.SelectFeature(vectorLayer);
+                map.addControl(selectCtrl);
+                selectCtrl.activate();
+            }
+        </script>
+    </body>
+</html>
